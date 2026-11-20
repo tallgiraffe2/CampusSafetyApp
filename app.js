@@ -27,7 +27,8 @@ function initializeMap() {
   const form = document.querySelector("#report-template").content.firstElementChild.cloneNode(true);
   const locationStatus = form.querySelector("#location");
   const descriptionInput = form.querySelector("#description");
-  const timeInput = form.querySelector("#occurred-at");
+  const dateInput = form.querySelector("#occurred-date");
+  const timeInput = form.querySelector("#occurred-time");
   const saveStatus = form.querySelector("#save-status");
 
   // Only the pin for the current report can move
@@ -127,7 +128,8 @@ function initializeMap() {
 
     // Read the pin after dragging so we save where it ended up
     const { lat, lng } = draftPin.getLatLng().wrap();
-    const report = { lat, lng, description, occurredAt: timeInput.value };
+    const occurredAt = `${dateInput.value}T${timeInput.value}`;
+    const report = { lat, lng, description, occurredAt };
     try {
       const reports = loadReports();
       reports.push(report);

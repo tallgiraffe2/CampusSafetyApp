@@ -31,8 +31,10 @@
     <form id="report-form" aria-labelledby="report-heading">
       <h3 id="report-heading">Report an incident</h3>
       <p id="location" role="status"></p>
-      <label for="occurred-at">Date and time of occurrence (local time)</label>
-      <input id="occurred-at" type="datetime-local" required>
+      <label for="occurred-date">Date of occurrence</label>
+      <input id="occurred-date" type="date" required>
+      <label for="occurred-time">Time of occurrence (local time)</label>
+      <input id="occurred-time" type="time" required>
       <label for="description">Description</label>
       <textarea id="description" rows="4" maxlength="2000" required></textarea>
       <button class="primary" type="submit">Save report</button>
