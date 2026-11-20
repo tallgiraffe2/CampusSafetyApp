@@ -1,5 +1,7 @@
 const storageKey = "campus-safety-reports";
 const reportStatus = document.querySelector("#report-status");
+const recentEventsStatus = document.querySelector("#recent-events-status");
+const recentEventsList = document.querySelector("#recent-events-list");
 
 /** Loads the reports saved by this browser. */
 function loadReports() {
@@ -10,8 +12,40 @@ function loadReports() {
   return reports;
 }
 
-/** Sets up the campus map and report form. */
-function initializeMap() {
+/** Shows saved reports in descending order of occurrence. */
+function renderRecentEvents(reports) {
+  const sortedReports = [...reports].sort((first, second) =>
+    new Date(second.occurredAt) - new Date(first.occurredAt));
+  const items = document.createDocumentFragment();
+  for (const report of sortedReports) {
+    const item = document.createElement("li");
+    const time = document.createElement("time");
+    time.dateTime = report.occurredAt;
+    time.textContent = new Date(report.occurredAt).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const description = document.createElement("p");
+    description.className = "report-description";
+    description.textContent = report.description;
+    item.append(time, description);
+    items.append(item);
+  }
+  recentEventsList.replaceChildren(items);
+  recentEventsList.hidden = reports.length === 0;
+  recentEventsStatus.hidden = reports.length > 0;
+}
+
+/** Sets up the recent events, campus map, and report form. */
+function initialize() {
+  let savedReports = [];
+  try {
+    savedReports = loadReports();
+    renderRecentEvents(savedReports);
+  } catch {
+    recentEventsStatus.textContent = "Saved reports could not be loaded.";
+  }
+
   if (!window.L) {
     reportStatus.textContent = "The map could not load. Check your connection and reload.";
     return;
@@ -84,7 +118,7 @@ function initializeMap() {
   }
 
   try {
-    for (const report of loadReports()) {
+    for (const report of savedReports) {
       showReport(report);
     }
   } catch {
@@ -130,8 +164,9 @@ function initializeMap() {
     const { lat, lng } = draftPin.getLatLng().wrap();
     const occurredAt = `${dateInput.value}T${timeInput.value}`;
     const report = { lat, lng, description, occurredAt };
+    let reports;
     try {
-      const reports = loadReports();
+      reports = loadReports();
       reports.push(report);
       localStorage.setItem(storageKey, JSON.stringify(reports));
     } catch {
@@ -145,8 +180,9 @@ function initializeMap() {
     form.reset();
     saveStatus.textContent = "";
     reportStatus.textContent = "Report saved.";
+    renderRecentEvents(reports);
     showReport(report).openPopup();
   });
 }
 
-initializeMap();
+initialize();
