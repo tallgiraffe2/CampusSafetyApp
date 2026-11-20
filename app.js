@@ -1,5 +1,7 @@
 const storageKey = "campus-safety-reports";
 const reportStatus = document.querySelector("#report-status");
+const recentEvents = document.querySelector("#recent-events");
+const recentEventsHeading = document.querySelector("#recent-events-heading");
 const recentEventsStatus = document.querySelector("#recent-events-status");
 const recentEventsList = document.querySelector("#recent-events-list");
 
@@ -58,7 +60,9 @@ function initialize() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
-  const form = document.querySelector("#report-template").content.firstElementChild.cloneNode(true);
+  const reportEditor = document.querySelector("#report-editor");
+  const form = reportEditor.querySelector("#report-form");
+  const reportHeading = reportEditor.querySelector("#report-heading");
   const locationStatus = form.querySelector("#location");
   const descriptionInput = form.querySelector("#description");
   const dateInput = form.querySelector("#occurred-date");
@@ -82,18 +86,31 @@ function initialize() {
         icon: L.divIcon({
           className: "incident-pin",
           iconSize: [24, 24],
-          iconAnchor: [12, 24],
+          iconAnchor: [12, 12],
         }),
         draggable: true,
         autoPan: true,
+        keyboard: false,
         zIndexOffset: 1000,
         alt: "Incident location",
-      }).addTo(map)
-        .bindPopup(form, { className: "report-popup", minWidth: 210, maxWidth: 280 })
-        .on("dragend", showLocation);
+      }).addTo(map).on("dragend", showLocation);
+      recentEvents.hidden = true;
+      reportEditor.hidden = false;
+      reportStatus.textContent = "";
+      reportHeading.focus();
     }
     showLocation();
-    draftPin.openPopup();
+  }
+
+  function closeEditor() {
+    draftPin.remove();
+    draftPin = undefined;
+    form.reset();
+    descriptionInput.setCustomValidity("");
+    saveStatus.textContent = "";
+    reportEditor.hidden = true;
+    recentEvents.hidden = false;
+    recentEventsHeading.focus();
   }
 
   /** Adds a saved report to the map with its own popup. */
@@ -125,6 +142,9 @@ function initialize() {
     reportStatus.textContent = "Saved reports could not be loaded.";
   }
 
+  // Leaflet suppresses click events after dragging the map or a marker.
+  map.on("click", ({ latlng }) => placePin(latlng));
+
   const mapContainer = map.getContainer();
   let mousePosition;
   mapContainer.addEventListener("pointermove", (event) => {
@@ -148,6 +168,7 @@ function initialize() {
     placePin(map.mouseEventToLatLng(mousePosition));
   });
 
+  form.querySelector("#cancel-report").addEventListener("click", closeEditor);
   descriptionInput.addEventListener("input", () => descriptionInput.setCustomValidity(""));
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -174,13 +195,9 @@ function initialize() {
       return;
     }
 
-    // Clear the form only after the report saves
-    draftPin.remove();
-    draftPin = undefined;
-    form.reset();
-    saveStatus.textContent = "";
-    reportStatus.textContent = "Report saved.";
     renderRecentEvents(reports);
+    closeEditor();
+    reportStatus.textContent = "Report saved.";
     showReport(report).openPopup();
   });
 }

@@ -46,7 +46,7 @@ main {
 #map-instructions { color: var(--muted); }
 
 #map,
-.recent-events {
+.map-card {
   box-sizing: border-box;
   height: var(--map-height);
 }
@@ -57,13 +57,16 @@ main {
   background: var(--control);
 }
 
-.recent-events {
-  display: flex;
-  flex-direction: column;
+.map-card {
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: var(--surface);
+}
+
+#recent-events:not([hidden]) {
+  display: flex;
+  flex-direction: column;
 }
 
 #recent-events-status { margin: 0; color: var(--muted); }
@@ -81,10 +84,16 @@ main {
 #recent-events-list time { color: var(--muted); font-size: 0.92rem; }
 #recent-events-list .report-description { margin: 0.25rem 0 0; }
 
-#report-heading { margin: 0 0 0.5rem; font-size: 1rem; }
-#map .report-popup .leaflet-popup-content { margin: 1rem 1.35rem; }
-#map .report-popup p { margin: 0.5rem 0; }
-#map #save-status:empty { margin: 0; }
+#report-editor { overflow-y: auto; }
+#report-form p { margin: 0.5rem 0; }
+#report-form #save-status:empty { margin: 0; }
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.85rem;
+}
 
 label {
   display: block;
@@ -117,8 +126,6 @@ button {
 }
 
 .primary {
-  display: block;
-  margin: 0.85rem 0;
   border-color: var(--accent);
   background: var(--accent);
   color: var(--background);
@@ -131,13 +138,10 @@ button {
 #report-status:empty { margin: 0; }
 .report-description { white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* Leaflet positions the pin. Rotate the shape to point down. */
 .incident-pin {
   box-sizing: border-box;
-  background: var(--accent);
-  border: 2px solid var(--background);
-  border-radius: 50% 50% 50% 0;
-  rotate: -45deg;
+  border: 3px dotted var(--accent);
+  border-radius: 50%;
 }
 
 #map .leaflet-bar a,
@@ -156,4 +160,5 @@ button {
 @media (max-width: 46rem) {
   main { --map-height: 22rem; }
   .map-layout { grid-template-columns: minmax(0, 1fr); }
+  #report-editor { height: auto; }
 }
